@@ -1,9 +1,9 @@
-
+import CanvasDrawing from "./components/canvasDrawing/CanvasDrawing";
 
 const App = () => {
   return (
     <div>
-      Hello Canvas
+      <CanvasDrawing />
     </div>
   );
 }
