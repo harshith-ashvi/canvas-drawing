@@ -187,15 +187,18 @@ const CanvasDrawing = () => {
     }
 
     const handleMouseUp = () => {
-        const index = selectedElement.id
-        const {id, type} = elements[index]
-        if (action === "drawing" || action === "resizing"){
-            const { x1, y1, x2, y2 } = adjustElementsCoordinates(elements[index])
-            updateElement(id, x1, y1, x2, y2, type)
+        if (selectedElement){
+            const index = selectedElement.id
+            const {id, type} = elements[index]
+            if (action === "drawing" || action === "resizing"){
+                const { x1, y1, x2, y2 } = adjustElementsCoordinates(elements[index])
+                updateElement(id, x1, y1, x2, y2, type)
+            }
+            
+            setAction("none")
+            setSelectedElement(null)
         }
         
-        setAction("none")
-        setSelectedElement(null)
     }
 
     return (
