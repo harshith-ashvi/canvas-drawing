@@ -2,7 +2,7 @@ import React from 'react'
 
 import { elementTypes } from '../../constants/elementTypes'
 
-const ElementTypes = ({elementType, handleTypeChange}) => {
+const ElementTypes = ({tool, handleTypeChange}) => {
     return (
         <div style={{position: "fixed", display: 'flex'}}>
             {elementTypes.map(element => {
@@ -11,7 +11,7 @@ const ElementTypes = ({elementType, handleTypeChange}) => {
                         <input
                             type="radio"
                             id={element.type} 
-                            checked={elementType === element.type}
+                            checked={tool === element.type}
                             onChange={() => handleTypeChange(element.type)}
                         />
                         <label>{element.label}</label>
