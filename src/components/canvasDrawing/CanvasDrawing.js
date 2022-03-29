@@ -1,5 +1,6 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import rough from 'roughjs/bundled/rough.esm'
+import useHistory from '../../Hooks/useHistory';
 import ElementTypes from '../elementTypes/ElementTypes';
 
 const generator = rough.generator()
@@ -104,7 +105,7 @@ const resizedCoordinates = (clientX, clientY, position, coordinates) => {
 }
 
 const CanvasDrawing = () => {
-    const [ elements, setElements ] = useState([])
+    const [ elements, setElements, undo, redo ] = useHistory([])
     const [ action, setAction ] = useState('none')
     const [ tool, setTool ] = useState("line")
     const [ selectedElement, setSelectedElement ] = useState(null)
@@ -116,16 +117,35 @@ const CanvasDrawing = () => {
 
         const roughCanvas = rough.canvas(canvas)
 
-        elements.forEach(({roughElement}) => roughCanvas.draw(roughElement))
+        elements?.forEach(({roughElement}) => roughCanvas.draw(roughElement))
 
 
     }, [elements])
+
+    useEffect(() => {
+        const undoRedoFunction = event => {  
+            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
+                console.log("in")
+                if (event.shiftKey) {
+                    redo()
+                } else {
+                    undo()
+                }
+            } 
+        }
+
+        document.addEventListener("keydown", undoRedoFunction)
+        return () => {
+            document.removeEventListener("keydown", undoRedoFunction)
+        }
+
+    }, [undo, redo])
 
     const updateElement = (id, x1, y1, clientX, clientY, type) => {
         const updatedElement = createElement(id, x1, y1, clientX, clientY, type)   
         const elementsCopy = [...elements]
         elementsCopy[id] = updatedElement
-        setElements(elementsCopy)
+        setElements(elementsCopy, true)
     }
 
     const handleTypeChange = (type) => {
@@ -140,6 +160,7 @@ const CanvasDrawing = () => {
                 const offsetX = clientX - element.x1
                 const offsetY = clientY - element.y1
                 setSelectedElement({...element, offsetX, offsetY})
+                setElements(prevState => prevState)
                 if(element.position === "inside"){
                     setAction("moving")
                 } else {
@@ -194,10 +215,9 @@ const CanvasDrawing = () => {
                 const { x1, y1, x2, y2 } = adjustElementsCoordinates(elements[index])
                 updateElement(id, x1, y1, x2, y2, type)
             }
-            
-            setAction("none")
-            setSelectedElement(null)
         }
+        setAction("none")
+        setSelectedElement(null)
         
     }
 
@@ -207,6 +227,10 @@ const CanvasDrawing = () => {
                 tool={tool} 
                 handleTypeChange={handleTypeChange} 
             />
+            <div style={{position: 'fixed', bottom: 0, padding: 10}}>
+                <button onClick={undo}>Undo</button>
+                <button onClick={redo}>Redo</button>
+            </div>
             <canvas 
                 id="canvas" 
                 width={window.innerWidth} 
